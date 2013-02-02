@@ -42,14 +42,20 @@ def build():
     jenkins_job       = require_arg('jenkins_job')
     jenkins_token     = require_arg('jenkins_token')
     jenkins_url       = require_arg('jenkins_url')
+    jenkins_user      = request.args.get('jenkins_user')
+    jenkins_password  = request.args.get('jenkins_password', '')
     jenkins_param_key = require_arg('jenkins_param_key', 'BRANCH')
 
     url = '{jenkins_url}/{jenkins_job}/buildWithParameters'.format(**vars())
     params = {'token': jenkins_token,
               jenkins_param_key: branch}
 
+    auth = None
+    if jenkins_user is not None:
+        auth = (jenkins_user, jenkins_password)
+
     log.debug('Submitting build request to %s with params %s', url, params)
-    res = requests.get(url, data=params)
+    res = requests.get(url, data=params, auth=auth)
 
     if res.ok:
         log.debug('Request submitted successfully to %s with params %s', url, params)

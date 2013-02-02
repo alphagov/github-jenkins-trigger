@@ -32,7 +32,7 @@ def require_arg(name, default=None):
 
 
 @app.route('/build', methods=('POST',))
-def trigger():
+def build():
     branch = _get_pushed_branch()
 
     if branch in IGNORE_BRANCHES:

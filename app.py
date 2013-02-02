@@ -55,7 +55,7 @@ def build():
         auth = (jenkins_user, jenkins_password)
 
     log.debug('Submitting build request to %s with params %s', url, params)
-    res = requests.get(url, data=params, auth=auth)
+    res = requests.get(url, params=params, auth=auth)
 
     if res.ok:
         log.debug('Request submitted successfully to %s with params %s', url, params)

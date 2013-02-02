@@ -55,13 +55,13 @@ def build():
         log.debug('Request submitted successfully to %s with params %s', url, params)
         return jsonify(status=200, message='Submitted request for build')
     else:
-        log.warn('Failed to submit request to %s with params %s. Upstream status %s, body follows:', url, params, res.status)
-        log.warn('%s', res.body)
+        log.warn('Failed to submit request to %s with params %s. Upstream status %s, body follows:', url, params, res.status_code)
+        log.warn('%s', res.content)
 
         abort('Error communicating with Jenkins',
               status=500,
-              upstream_status=res.status,
-              upstream_response_body=res.body)
+              upstream_status=res.status_code,
+              upstream_response_body=res.content)
 
 
 def _get_pushed_branch():

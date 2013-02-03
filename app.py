@@ -33,11 +33,8 @@ def require_arg(name, default=None):
 
 @app.route('/build', methods=('POST',))
 def build():
-    branch = _get_pushed_branch()
-
-    if branch in IGNORE_BRANCHES:
-        log.debug('Ignoring push on %s', branch)
-        return jsonify(status=200, message='Ignoring push on {0}'.format(branch))
+    payload = _get_payload()
+    branch = _get_branch(payload)
 
     jenkins_job       = require_arg('jenkins_job')
     jenkins_token     = require_arg('jenkins_token')
@@ -50,11 +47,21 @@ def build():
     params = {'token': jenkins_token,
               jenkins_param_key: branch}
 
+    if branch in IGNORE_BRANCHES:
+        msg = 'Ignoring push ("{0}" in IGNORE_BRANCHES)'.format(branch)
+        log.debug(msg)
+        return jsonify(status=200, message=msg)
+
+    if payload.get('deleted'):
+        msg = 'Ignoring branch deletion ("{0}")'.format(branch)
+        log.debug(msg)
+        return jsonify(status=200, message=msg)
+
+    log.debug('Submitting build request to %s with params %s', url, params)
+
     auth = None
     if jenkins_user is not None:
         auth = (jenkins_user, jenkins_password)
-
-    log.debug('Submitting build request to %s with params %s', url, params)
     res = requests.get(url, params=params, auth=auth)
 
     if res.ok:
@@ -70,8 +77,8 @@ def build():
               upstream_response_body=res.content)
 
 
-def _get_pushed_branch():
-    """Parse the POST payload and return the name of the pushed branch"""
+def _get_payload():
+    """Parse and return the POST payload"""
     payload_json = request.form.get('payload')
     if payload_json is None:
         abort('No "payload" POST parameter supplied')
@@ -81,6 +88,11 @@ def _get_pushed_branch():
     except ValueError:
         abort('Error encountered when parsing payload JSON')
 
+    return payload
+
+
+def _get_branch(payload):
+    """Extract the branch name from the payload data"""
     ref = payload.get('ref')
 
     if ref is None:

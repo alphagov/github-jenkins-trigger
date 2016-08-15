@@ -14,6 +14,7 @@ log = logging.getLogger(__name__)
 DEBUG           = environ.get('DEBUG', 'false') == 'true'
 IGNORE_BRANCHES = [b for b in environ.get('IGNORE_BRANCHES', '').split(',') if b != '']
 REF_PREFIX      = 'refs/heads/'
+JENKINS_URL     = environ.get('JENKINS_URL', '')
 
 app.config.from_object(__name__)
 
@@ -33,17 +34,19 @@ def require_arg(name, default=None):
 
 @app.route('/build', methods=('POST',))
 def build():
+    if JENKINS_URL == '':
+        abort('Environment variable JENKINS_URL was not set')
+
     payload = _get_payload()
     branch = _get_branch(payload)
 
     jenkins_job       = require_arg('jenkins_job')
     jenkins_token     = require_arg('jenkins_token')
-    jenkins_url       = require_arg('jenkins_url')
     jenkins_user      = request.args.get('jenkins_user')
     jenkins_password  = request.args.get('jenkins_password', '')
     jenkins_param_key = require_arg('jenkins_param_key', 'BRANCH')
 
-    url = '{jenkins_url}/job/{jenkins_job}/buildWithParameters'.format(**vars())
+    url = '{JENKINS_URL}/job/{jenkins_job}/buildWithParameters'.format(**vars())
     params = {'token': jenkins_token,
               jenkins_param_key: branch}
 

@@ -42,11 +42,12 @@ def build():
 
     jenkins_job       = require_arg('jenkins_job')
     jenkins_token     = require_arg('jenkins_token')
+    jenkins_url       = JENKINS_URL
     jenkins_user      = request.args.get('jenkins_user')
     jenkins_password  = request.args.get('jenkins_password', '')
     jenkins_param_key = require_arg('jenkins_param_key', 'BRANCH')
 
-    url = '{JENKINS_URL}/job/{jenkins_job}/buildWithParameters'.format(**vars())
+    url = '{jenkins_url}/job/{jenkins_job}/buildWithParameters'.format(**vars())
     params = {'token': jenkins_token,
               jenkins_param_key: branch}
 

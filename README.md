@@ -38,15 +38,18 @@ If your Heroku application is running at http://myapp-123.herokuapp.com, you
 should now add a WebHook to your GitHub project. Use the following URL as a
 template, removing newlines which have been added here for clarity:
 
-    http://myapp-123.herokuapp.com/build?jenkins_url=<root_url>
-                                        &jenkins_job=<job_name>
+    http://myapp-123.herokuapp.com/build?jenkins_job=<job_name>
                                         &jenkins_token=<token>
 
 For example:
 
-    http://myapp-123.herokuapp.com/build?jenkins_url=http://jenkins.acmecorp.com
-                                        &jenkins_job=acme-product
+    http://myapp-123.herokuapp.com/build?jenkins_job=acme-product
                                         &jenkins_token=4e7ea85b-8ed0-458f-a055-e18519cde94b
+
+You will need to set the base URL for your jenkins instance via an environment variable,
+for example:
+
+    heroku config set JENKINS_URL=https://jenkins.example.com
 
 Other optional parameters include:
 

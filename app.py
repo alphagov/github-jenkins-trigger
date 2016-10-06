@@ -32,6 +32,11 @@ def require_arg(name, default=None):
     return val
 
 
+@app.route('/', methods=('GET',))
+def root():
+    return jsonify(status=200, message='This is a GitHub webhook that triggers builds on Jenkins: https://github.com/alphagov/github-jenkins-trigger')
+
+
 @app.route('/build', methods=('POST',))
 def build():
     if JENKINS_URL == '':

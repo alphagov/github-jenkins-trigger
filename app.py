@@ -73,7 +73,7 @@ def build():
     auth = None
     if jenkins_user is not None:
         auth = (jenkins_user, jenkins_password)
-    res = requests.get(url, params=params, auth=auth, timeout=10)
+    res = requests.get(url, params=params, auth=auth, timeout=10, allow_redirects=False)
 
     if res.ok:
         log.debug('Request submitted successfully to %s with params %s', url, params)

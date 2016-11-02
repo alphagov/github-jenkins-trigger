@@ -66,12 +66,14 @@ def build():
         log.debug(msg)
         return jsonify(status=200, message=msg)
 
-    log.debug('Submitting build request to %s with params %s', url, params)
+    ip = requests.get('http://canhazip.com/').text.strip()
+
+    log.debug('Submitting build request to %s with params %s from IP %s', url, params, ip)
 
     auth = None
     if jenkins_user is not None:
         auth = (jenkins_user, jenkins_password)
-    res = requests.get(url, params=params, auth=auth)
+    res = requests.get(url, params=params, auth=auth, timeout=10)
 
     if res.ok:
         log.debug('Request submitted successfully to %s with params %s', url, params)

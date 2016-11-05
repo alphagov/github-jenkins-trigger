@@ -43,6 +43,10 @@ def build():
         abort('Environment variable JENKINS_URL was not set')
 
     payload = _get_payload()
+
+    if payload.get('ref').startswith('refs/tags/'):
+        return jsonify(status=200, message='Ignoring build request for tag: {0}'.format(ref))
+
     branch = _get_branch(payload)
 
     jenkins_job       = require_arg('jenkins_job')

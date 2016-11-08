@@ -15,6 +15,8 @@ DEBUG           = environ.get('DEBUG', 'false') == 'true'
 IGNORE_BRANCHES = [b for b in environ.get('IGNORE_BRANCHES', '').split(',') if b != '']
 REF_PREFIX      = 'refs/heads/'
 JENKINS_URL     = environ.get('JENKINS_URL', '')
+JENKINS_USER    = environ.get('JENKINS_USER', '')
+JENKINS_PASS    = environ.get('JENKINS_PASS', '')
 
 app.config.from_object(__name__)
 
@@ -48,8 +50,8 @@ def build():
     jenkins_job       = require_arg('jenkins_job')
     jenkins_token     = require_arg('jenkins_token')
     jenkins_url       = JENKINS_URL
-    jenkins_user      = request.args.get('jenkins_user')
-    jenkins_password  = request.args.get('jenkins_password', '')
+    jenkins_user      = JENKINS_USER
+    jenkins_password  = JENKINS_PASS
     jenkins_param_key = require_arg('jenkins_param_key', 'BRANCH')
 
     url = '{jenkins_url}/job/{jenkins_job}/buildWithParameters'.format(**vars())

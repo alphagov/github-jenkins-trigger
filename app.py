@@ -110,7 +110,7 @@ def _get_branch(payload):
         abort('No "ref" supplied in payload')
 
     if not ref.startswith(REF_PREFIX):
-        abort('Invalid format for "ref" in payload: should be "{0}/BRANCHNAME"'.format(REF_PREFIX))
+        abort('Invalid format for "ref" in payload: should be "{0}BRANCHNAME"'.format(REF_PREFIX))
 
     branch = ref[len(REF_PREFIX):]
     return branch

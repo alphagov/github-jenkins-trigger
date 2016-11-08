@@ -14,6 +14,7 @@ log = logging.getLogger(__name__)
 DEBUG           = environ.get('DEBUG', 'false') == 'true'
 IGNORE_BRANCHES = [b for b in environ.get('IGNORE_BRANCHES', '').split(',') if b != '']
 REF_PREFIX      = 'refs/heads/'
+IGNORE_REFS     = ['refs/tags/']
 JENKINS_URL     = environ.get('JENKINS_URL', '')
 
 app.config.from_object(__name__)
@@ -67,6 +68,16 @@ def build():
         log.debug(msg)
         return jsonify(status=200, message=msg)
 
+    if ref in IGNORE_REFS:
+        msg = 'Ignoring push ("{0}" in IGNORE_REFS)'.format(ref)
+        log.debug(msg)
+        return jsonify(status=200, message=msg)
+
+    if not ref.startswith(REF_PREFIX):
+        msg = 'Invalid format for "ref" in payload: should be "{0}BRANCHNAME"'.format(REF_PREFIX)
+        log.debug(msg)
+        abort(msg)
+
     ip = requests.get('http://canhazip.com/').text.strip()
 
     log.debug('Submitting build request to %s with params %s from IP %s', url, params, ip)
@@ -109,9 +120,6 @@ def _get_ref(payload):
 
     if ref is None:
         abort('No "ref" supplied in payload')
-
-    if not ref.startswith(REF_PREFIX):
-        abort('Invalid format for "ref" in payload: should be "{0}BRANCHNAME"'.format(REF_PREFIX))
 
     return ref
 

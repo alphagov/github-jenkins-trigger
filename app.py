@@ -43,7 +43,8 @@ def build():
         abort('Environment variable JENKINS_URL was not set')
 
     payload = _get_payload()
-    branch = _get_branch(payload)
+    ref = _get_ref(payload)
+    branch = _get_branch(ref)
 
     jenkins_job       = require_arg('jenkins_job')
     jenkins_token     = require_arg('jenkins_token')
@@ -102,8 +103,8 @@ def _get_payload():
     return payload
 
 
-def _get_branch(payload):
-    """Extract the branch name from the payload data"""
+def _get_ref(payload):
+    """Extract the ref name from the payload data"""
     ref = payload.get('ref')
 
     if ref is None:
@@ -112,8 +113,12 @@ def _get_branch(payload):
     if not ref.startswith(REF_PREFIX):
         abort('Invalid format for "ref" in payload: should be "{0}BRANCHNAME"'.format(REF_PREFIX))
 
-    branch = ref[len(REF_PREFIX):]
-    return branch
+    return ref
+
+
+def _get_branch(ref):
+    """Extract the branch from the reference"""
+    return ref[len(REF_PREFIX):]
 
 
 if __name__ == '__main__':

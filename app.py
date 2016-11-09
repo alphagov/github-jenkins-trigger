@@ -14,6 +14,7 @@ log = logging.getLogger(__name__)
 DEBUG           = environ.get('DEBUG', 'false') == 'true'
 IGNORE_BRANCHES = [b for b in environ.get('IGNORE_BRANCHES', '').split(',') if b != '']
 REF_PREFIX      = 'refs/heads/'
+IGNORE_REFS     = ['refs/tags/']
 JENKINS_URL     = environ.get('JENKINS_URL', '')
 JENKINS_USER    = environ.get('JENKINS_USER', '')
 JENKINS_PASS    = environ.get('JENKINS_PASS', '')
@@ -45,7 +46,8 @@ def build():
         abort('Environment variable JENKINS_URL was not set')
 
     payload = _get_payload()
-    branch = _get_branch(payload)
+    ref = _get_ref(payload)
+    branch = _get_branch(ref)
 
     jenkins_job       = require_arg('jenkins_job')
     jenkins_token     = require_arg('jenkins_token')
@@ -67,6 +69,16 @@ def build():
         msg = 'Ignoring branch deletion ("{0}")'.format(branch)
         log.debug(msg)
         return jsonify(status=200, message=msg)
+
+    if ref in IGNORE_REFS:
+        msg = 'Ignoring push ("{0}" in IGNORE_REFS)'.format(ref)
+        log.debug(msg)
+        return jsonify(status=200, message=msg)
+
+    if not ref.startswith(REF_PREFIX):
+        msg = 'Invalid format for "ref" in payload: should be "{0}BRANCHNAME"'.format(REF_PREFIX)
+        log.debug(msg)
+        abort(msg)
 
     ip = requests.get('http://canhazip.com/').text.strip()
 
@@ -104,18 +116,19 @@ def _get_payload():
     return payload
 
 
-def _get_branch(payload):
-    """Extract the branch name from the payload data"""
+def _get_ref(payload):
+    """Extract the ref name from the payload data"""
     ref = payload.get('ref')
 
     if ref is None:
         abort('No "ref" supplied in payload')
 
-    if not ref.startswith(REF_PREFIX):
-        abort('Invalid format for "ref" in payload: should be "{0}/BRANCHNAME"'.format(REF_PREFIX))
+    return ref
 
-    branch = ref[len(REF_PREFIX):]
-    return branch
+
+def _get_branch(ref):
+    """Extract the branch from the reference"""
+    return ref[len(REF_PREFIX):]
 
 
 if __name__ == '__main__':
